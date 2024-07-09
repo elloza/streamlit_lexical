@@ -1,11 +1,11 @@
-# streamlit-custom-component
+# streamlit_lexical
 
 Streamlit component that allows you to use Lexical's rich text plugin. 
 
 ## Installation instructions
 
 ```sh
-pip install streamlit_lexical
+pip install -e ./
 ```
 
 ## Usage instructions
