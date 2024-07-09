@@ -5,6 +5,10 @@ Streamlit component that allows you to use Lexical's rich text plugin.
 ## Installation instructions
 
 ```sh
+cd streamlit_lexical/frontend
+npm install (or yarn install)
+npm run build
+cd ../..
 pip install -e ./
 ```
 
