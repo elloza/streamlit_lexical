@@ -9,17 +9,19 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { EditorState } from 'lexical';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 
 import theme from './theme';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
+import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown';
+
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { CodeNode } from '@lexical/code';
-import {ListNode, ListItemNode} from '@lexical/list'
+import {ListNode, ListItemNode } from '@lexical/list'
+import {ListPlugin} from '@lexical/react/LexicalListPlugin'
 import {LinkNode} from '@lexical/link'
 
 interface State {
@@ -62,6 +64,7 @@ class StreamlitLexical extends StreamlitComponentBase<State> {
               <HistoryPlugin />
               <AutoFocusPlugin />
               <MarkdownShortcutPlugin />
+              <ListPlugin />
               {/* <TreeViewPlugin /> */}
               <OnChangePlugin onChange={this.handleEditorChange} />
             </div>
@@ -71,27 +74,35 @@ class StreamlitLexical extends StreamlitComponentBase<State> {
     );
   };
 
-  private handleEditorChange = (editorState: any) => {
+  private handleEditorChange = debounce((editorState: any) => {
     editorState.read(() => {
+      const markdown = $convertToMarkdownString(TRANSFORMERS);
       const jsonState = JSON.stringify(editorState.toJSON());
       this.setState({ editorState: jsonState });
-      Streamlit.setComponentValue(jsonState);
+      Streamlit.setComponentValue(markdown);
     });
-  };
+  }, 500); // debounce is 500ms
 }
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
 }
 
-function OnChangePlugin({ onChange }: { onChange: (editorState: EditorState) => void }) {
-  const [editor] = useLexicalComposerContext();
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      onChange(editorState);
-    });
-  }, [editor, onChange]);
-  return null;
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout | null = null;
+
+  return function (this: any, ...args: Parameters<T>) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
 }
 
 export default withStreamlitConnection(StreamlitLexical);

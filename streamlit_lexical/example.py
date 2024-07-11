@@ -8,8 +8,8 @@ st.subheader("Lexical Rich Text Editor")
 
 # Create an instance of our component with a constant `name` arg, and
 # print its output value.
-text_dict = streamlit_lexical("test")
+markdown = streamlit_lexical("test")
 
-st.markdown(f"Text information: {text_dict}")
+st.markdown(markdown)
 
 st.markdown("---")
