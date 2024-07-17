@@ -4,12 +4,11 @@ from __init__ import streamlit_lexical
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/example.py`
 
-st.subheader("Lexical Rich Text Editor")
+st.write("#") # if this isnt here, for some reason, if you change the heading prior to entering any text, the page jumps to the bottom
+st.header("Lexical Rich Text Editor")
 
 # Create an instance of our component with a constant `name` arg, and
-# print its output value.
-markdown = streamlit_lexical("test")
+markdown = streamlit_lexical(value="", placeholder="Enter some rich text", min_height=800)
 
 st.markdown(markdown)
-
 st.markdown("---")

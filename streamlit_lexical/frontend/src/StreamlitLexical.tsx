@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Streamlit,
   StreamlitComponentBase,
@@ -24,12 +24,21 @@ import {ListNode, ListItemNode } from '@lexical/list'
 import {ListPlugin} from '@lexical/react/LexicalListPlugin'
 import {LinkNode} from '@lexical/link'
 
+import {
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode
+} from 'lexical';
+
 interface State {
   editorState: string;
 }
 
 interface Props {
   min_height: number;
+  value: string;
+  placeholder: string;
+  debounce: number;
 }
 
 class StreamlitLexical extends StreamlitComponentBase<State, Props> {
@@ -39,11 +48,20 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
   private editorConfig = {
     namespace: 'MyStreamlitRichTextEditor',
-    theme: theme,
+    theme,
     onError: (error: Error) => {
       console.error('Lexical error:', error);
     },
     nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, CodeNode, ListNode, ListItemNode, LinkNode],
+    editorState: () => {
+      const root = $getRoot();
+      if (root.getFirstChild() === null) {
+        const paragraph = $createParagraphNode();
+        const text = $createTextNode(this.props.args.value || '');
+        paragraph.append(text);
+        root.append(paragraph);
+      }
+    },
   };
 
   public render = (): React.ReactNode => {
@@ -62,7 +80,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
             <div className="editor-inner">
               <RichTextPlugin
                 contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px` }} />}
-                placeholder={<Placeholder />}
+                placeholder={<Placeholder text={args.placeholder} />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <HistoryPlugin />
@@ -85,11 +103,12 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       this.setState({ editorState: jsonState });
       Streamlit.setComponentValue(markdown);
     });
-  }, 500); // debounce is 500ms
+  }, this.props.args.debounce); 
 }
 
-function Placeholder() {
-  return <div className="editor-placeholder">Enter some rich text...</div>;
+
+function Placeholder({ text }: { text: string }) {
+  return <div className="editor-placeholder">{text}</div>;
 }
 
 function debounce<T extends (...args: any[]) => void>(

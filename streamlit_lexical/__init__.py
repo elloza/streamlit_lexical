@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = False
+_RELEASE = True
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
 # function "_component_func", with an underscore prefix, because we don't want
@@ -22,7 +22,7 @@ if not _RELEASE:
         # We give the component a simple, descriptive name ("my_component"
         # does not fit this bill, so please choose something better for your
         # own component :)
-        "my_component",
+        "streamlit_lexical",
         # Pass `url` here to tell Streamlit that the component will be served
         # by the local dev server that you run via `npm run start`.
         # (This is useful while your component is in development.)
@@ -42,14 +42,19 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def streamlit_lexical(name, min_height=960, key=None):
-    """Create a new instance of "my_component".
+def streamlit_lexical(min_height=960, value="", placeholder="", debounce=500, key=None):
+    """Create a new instance of "streamlit_lexical".
 
     Parameters
     ----------
-    name: str
-        The name of the thing we're saying hello to. The component will display
-        the text "Hello, {name}!"
+    min_height: int
+        Optional specification for height, in pixels of lexical text box.
+    value: str
+        Optional initial value to pass to editor
+    placeholder: str
+        Optional initial placeholder text to display in editor
+    debounce:
+        Time delay to save editor contents. Default is 500 ms/
     key: str or None
         An optional key that uniquely identifies this component. If this is
         None, and the component's arguments are changed, the component will
@@ -57,20 +62,11 @@ def streamlit_lexical(name, min_height=960, key=None):
 
     Returns
     -------
-    int
-        The number of times the component's "Click Me" button has been clicked.
-        (This is the value passed to `Streamlit.setComponentValue` on the
-        frontend.)
+    str
+        Markdown string of content in editor
 
     """
-    # Call through to our private component function. Arguments we pass here
-    # will be sent to the frontend, where they'll be available in an "args"
-    # dictionary.
-    #
-    # "default" is a special argument that specifies the initial return
-    # value of the component before the user has interacted with it.
-    component_value = _component_func(name=name, min_height=min_height, key=key, default="")
-
-    # We could modify the value returned from the component if we wanted.
-    # There's no need to do this in our simple example - but it's an option.
+    assert debounce > 0, "Debounce must be greater than 0."
+    assert min_height > 0, "The min_height must be greater than 0." 
+    component_value = _component_func(min_height=min_height, key=key, value=value, placeholder=placeholder, debounce=debounce)
     return component_value

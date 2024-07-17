@@ -1,10 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {mergeRegister} from '@lexical/utils';
 import {
@@ -20,7 +13,7 @@ import {
 } from 'lexical';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
-import { $createHeadingNode, $isHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 
 const LowPriority = 1;
