@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = False
+_RELEASE = True
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
 # function "_component_func", with an underscore prefix, because we don't want
@@ -42,7 +42,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def streamlit_lexical(height=960, value="", placeholder="", debounce=500, key=None):
+def streamlit_lexical(height=960, value="", placeholder="", debounce=500, key=None, on_change=None):
     """Create a new instance of "streamlit_lexical".
 
     Parameters
@@ -68,5 +68,5 @@ def streamlit_lexical(height=960, value="", placeholder="", debounce=500, key=No
     """
     assert debounce > 0, "Debounce must be greater than 0."
     assert height > 0, "The min_height must be greater than 0." 
-    component_value = _component_func(min_height=height, key=key, value=value, placeholder=placeholder, debounce=debounce)
+    component_value = _component_func(min_height=height, key=key, value=value, placeholder=placeholder, debounce=debounce, on_change=on_change)
     return component_value

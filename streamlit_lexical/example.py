@@ -8,7 +8,7 @@ st.write("#") # if this isnt here, for some reason, if you change the heading pr
 st.header("Lexical Rich Text Editor")
 
 # Create an instance of our component with a constant `name` arg, and
-markdown = streamlit_lexical(value="", placeholder="Enter some rich text", height=800)
+markdown = streamlit_lexical(value="", placeholder="Enter some rich text", height=800, on_change=None)
 
 st.markdown(markdown)
 st.markdown("---")
