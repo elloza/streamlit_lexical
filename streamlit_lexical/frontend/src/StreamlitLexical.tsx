@@ -15,7 +15,7 @@ import ToolbarPlugin from './plugins/ToolbarPlugin';
 
 import theme from './theme';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown';
+import { $convertFromMarkdownString, $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown';
 
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
@@ -56,10 +56,14 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     editorState: () => {
       const root = $getRoot();
       if (root.getFirstChild() === null) {
-        const paragraph = $createParagraphNode();
-        const text = $createTextNode(this.props.args.value || '');
-        paragraph.append(text);
-        root.append(paragraph);
+        const parsedNodes = $convertFromMarkdownString(this.props.args.value, TRANSFORMERS);
+        return parsedNodes;
+        // } else {
+        //   const paragraph = $createParagraphNode();
+        //   const text = $createTextNode('');
+        //   paragraph.append(text);
+        //   root.append(paragraph);
+        // }
       }
     },
   };
