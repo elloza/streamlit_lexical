@@ -1,83 +1,93 @@
-.editor-container {
-  margin: 20px auto;
-  width: 100%;
-  max-width: 800px;
-  color: #333;
-  position: relative;
-  line-height: 20px;
-  font-weight: 400;
-  text-align: left;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.editor-inner {
-  background: #fff;
-  position: relative;
-}
-
-.editor-input {
-  min-height: 300px;
-  resize: none;
-  font-size: 15px;
-  caret-color: rgb(5, 5, 5);
-  position: relative;
-  tab-size: 1;
-  outline: none;
-  padding: 25px 10px 15px;
-  caret-color: #444;
-}
-
 .editor-placeholder {
   color: #999;
   overflow: hidden;
   position: absolute;
-  text-overflow: ellipsis;
-  top: 25px;
-  left: 10px;
-  font-size: 15px;
+  font-size: 14px;
+  font-family: "Source Sans Pro", sans-serif;
+  top: 0.6rem;
+  left: 0.55rem;
   user-select: none;
   pointer-events: none;
 }
 
-.editor-text-bold {
-  font-weight: bold;
+.editor-container {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  /* color: var(--text-color); */
+  position: relative;
+  line-height: 20px;
+  font-weight: 400;
+  text-align: left;
+  border-radius: 0.25rem;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.editor-text-italic {
-  font-style: italic;
-}
-
-.editor-text-underline {
-  text-decoration: underline;
-}
-
-.editor-text-strikethrough {
-  text-decoration: line-through;
-}
-
-.editor-text-underlineStrikethrough {
-  text-decoration: underline line-through;
-}
-
-.toolbar {
-  display: flex;
-  margin-bottom: 1px;
-  background: #fff;
-  padding: 4px 10px;
-  vertical-align: middle;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border: 1px solid #ccc;
-  border-bottom: none;
+.editor-inner {
+  background: white;
+  position: relative;
 }
 
 .editor-input {
-  border: 1px solid #ccc;
-  border-top: none;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  /* min-height: 850px; this is now a parameter */
+  resize: none;
+  font-size: 14px;
+  font-family: "Source Sans Pro", sans-serif;
+  caret-color: rgb(5, 5, 5);
+  position: relative;
+  tab-size: 1;
+  outline: none;
+  padding: 0.5rem;
+  color: rgb(5, 5, 5);
+  background-color: white;
+  /* border: 1px solid var(--secondary-background-color); */
+  border-radius: 0 0 0.25rem 0.25rem;
+  /* margin-top: -1px; */
 }
+
+/* .editor-heading-h1 {
+  font-size: 24px;
+  color: rgb(5, 5, 5);
+  font-weight: 400;
+  margin: 0;
+  margin-bottom: 12px;
+  padding: 0;
+} */
+
+.toolbar {
+  display: flex;
+  /* margin-top: 20px; */
+  margin-bottom: 1px;
+  background: white;
+  padding: 8px 10px;
+  vertical-align: middle;
+  position: relative;
+  z-index: 10;
+  /* border: 1px solid var(--text-color); */
+  /* border: 1px solid var(--secondary-background-color); */
+  border-bottom: 1px solid #eee;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
+
+.streamlit-lexical-editor {
+  color-scheme: light;
+}
+
+.streamlit-lexical-editor * {
+  color: #555;
+}
+
+/* .toolbar {
+  display: flex;
+  margin-bottom: 1px;
+  background: #fff;
+  padding: 4px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  vertical-align: middle;
+} */
 
 .toolbar button.toolbar-item {
   border: 0;
@@ -93,11 +103,34 @@
   cursor: not-allowed;
 }
 
+.toolbar button.toolbar-item.spaced {
+  margin-right: 2px;
+}
+
+.toolbar button.toolbar-item i.format {
+  background-size: contain;
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  margin-top: 2px;
+  vertical-align: -0.25em;
+  display: flex;
+  opacity: 0.6;
+}
+
+.toolbar button.toolbar-item:disabled i.format {
+  opacity: 0.2;
+}
+
 .toolbar button.toolbar-item.active {
   background-color: rgba(223, 232, 250, 0.3);
 }
 
-.toolbar button.toolbar-item:hover:not([disabled]) {
+.toolbar button.toolbar-item.active i {
+  opacity: 1;
+}
+
+.toolbar .toolbar-item:hover:not([disabled]) {
   background-color: #eee;
 }
 
@@ -105,21 +138,6 @@
   width: 1px;
   background-color: #eee;
   margin: 0 4px;
-}
-
-.toolbar select.toolbar-item {
-  border: 0;
-  display: flex;
-  background: none;
-  border-radius: 10px;
-  padding: 8px;
-  vertical-align: middle;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  width: 70px;
-  font-size: 14px;
-  color: #777;
-  text-overflow: ellipsis;
 }
 
 .toolbar .toolbar-item .text {
@@ -146,9 +164,62 @@
   background-size: contain;
 }
 
+.toolbar select.toolbar-item {
+  border: none;
+  border-radius: 4px;
+  background-color: white;
+  color: #555;
+  font-size: 14px;
+  padding: 6px 8px;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-.toolbar button.toolbar-item.active {
-  background-color: rgba(223, 232, 250, 0.3);
+.toolbar select.toolbar-item:hover {
+  background-color: #f0f0f0;
+}
+
+.toolbar select.toolbar-item:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+/* Remove default arrow in some browsers */
+.toolbar select.toolbar-item::-ms-expand {
+  display: none;
+}
+
+/* Custom arrow */
+.toolbar select.toolbar-item {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23555555%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px auto;
+  padding-right: 24px;
+}
+
+i.undo {
+  background-image: url(icons/arrow-counterclockwise.svg);
+}
+
+i.redo {
+  background-image: url(icons/arrow-clockwise.svg);
+}
+
+i.bold {
+  background-image: url(icons/type-bold.svg);
+}
+
+i.italic {
+  background-image: url(icons/type-italic.svg);
+}
+
+i.underline {
+  background-image: url(icons/type-underline.svg);
 }
 
 .editor-text-bold {

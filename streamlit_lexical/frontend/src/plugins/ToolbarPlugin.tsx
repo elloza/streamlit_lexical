@@ -1,22 +1,37 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {mergeRegister} from '@lexical/utils';
 import {
   $getSelection,
   $isRangeSelection,
-  FORMAT_TEXT_COMMAND,
   $createParagraphNode,
-  UNDO_COMMAND,
-  REDO_COMMAND,
-  CAN_UNDO_COMMAND,
   CAN_REDO_COMMAND,
+  CAN_UNDO_COMMAND,
+  FORMAT_TEXT_COMMAND,
+  REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  UNDO_COMMAND
 } from 'lexical';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 import { $createHeadingNode, $isHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 
+const LowPriority = 1;
+
+function Divider() {
+  return <div className="divider" />;
+}
+
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
+  const toolbarRef = useRef(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [isBold, setIsBold] = useState(false);
@@ -24,99 +39,30 @@ export default function ToolbarPlugin() {
   const [isUnderline, setIsUnderline] = useState(false);
   const [currentHeading, setCurrentHeading] = useState('paragraph');
 
-  const updateToolbar = useCallback(() => {
+  const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
-      const anchorNode = selection.anchor.getNode();
-      const element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow();
-      const elementKey = element.getKey();
-      const elementDOM = editor.getElementByKey(elementKey);
-  
       // Update text format
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
       setIsUnderline(selection.hasFormat('underline'));
   
       // Update heading
-      if (elementDOM !== null) {
-        const type = $isHeadingNode(element) ? element.getTag() : 'paragraph';
-        setCurrentHeading(type);
+      const anchorNode = selection.anchor.getNode();
+      const element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElement();
+      if (element !== null) {
+        const elementKey = element.getKey();
+        const elementDOM = editor.getElementByKey(elementKey);
+        if (elementDOM !== null) {
+          if (elementDOM.tagName === 'P') {
+            setCurrentHeading('paragraph');
+          } else if (elementDOM.tagName.match(/^H[1-6]$/)) {
+            setCurrentHeading(elementDOM.tagName.toLowerCase());
+          }
+        }
       }
     }
   }, [editor]);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        updateToolbar();
-      });
-    });
-  }, [editor, updateToolbar]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      CAN_UNDO_COMMAND,
-      (payload) => {
-        setCanUndo(payload);
-        return false;
-      },
-      1
-    );
-  }, [editor]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      CAN_REDO_COMMAND,
-      (payload) => {
-        setCanRedo(payload);
-        return false;
-      },
-      1
-    );
-  }, [editor]);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        updateToolbar();
-      });
-    });
-  }, [editor, updateToolbar]);
-  
-  useEffect(() => {
-    return editor.registerCommand(
-      SELECTION_CHANGE_COMMAND,
-      () => {
-        updateToolbar();
-        return false;
-      },
-      1
-    );
-  }, [editor, updateToolbar]);
-
-  const toolbarStyle: React.CSSProperties = {
-    display: 'flex',
-    marginBottom: '1px',
-    background: '#fff',
-    padding: '8px',
-    border: '1px solid #ccc',
-    borderTopLeftRadius: '5px',
-    borderTopRightRadius: '5px',
-    position: 'sticky',
-    top: 0,
-    zIndex: 10,
-  };
-  
-  const buttonStyle = {
-    border: '1px solid #ccc',
-    background: '#fff',
-    borderRadius: '4px',
-    padding: '6px 12px',
-    margin: '0 4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold' as const,
-  };
 
   const onHeadingChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -134,93 +80,99 @@ export default function ToolbarPlugin() {
     [editor]
   );
 
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerUpdateListener(({editorState}) => {
+        editorState.read(() => {
+          $updateToolbar();
+        });
+      }),
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        (_payload, _newEditor) => {
+          $updateToolbar();
+          return false;
+        },
+        LowPriority,
+      ),
+      editor.registerCommand(
+        CAN_UNDO_COMMAND,
+        (payload) => {
+          setCanUndo(payload);
+          return false;
+        },
+        LowPriority,
+      ),
+      editor.registerCommand(
+        CAN_REDO_COMMAND,
+        (payload) => {
+          setCanRedo(payload);
+          return false;
+        },
+        LowPriority,
+      ),
+    );
+  }, [editor, $updateToolbar]);
+
   return (
-    <div style={toolbarStyle}>
+    <div className="toolbar" ref={toolbarRef}>
+      <button
+        disabled={!canUndo}
+        onClick={() => {
+          editor.dispatchCommand(UNDO_COMMAND, undefined);
+        }}
+        className="toolbar-item spaced"
+        aria-label="Undo">
+        <i className="format undo" />
+      </button>
+      <button
+        disabled={!canRedo}
+        onClick={() => {
+          editor.dispatchCommand(REDO_COMMAND, undefined);
+        }}
+        className="toolbar-item"
+        aria-label="Redo">
+        <i className="format redo" />
+      </button>
+      <Divider />
       <button
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
         }}
-        style={{
-          ...buttonStyle,
-          backgroundColor: isBold ? '#e6e6e6' : '#fff',
-        }}
-        aria-label="Format Bold"
-      >
-        B
+        className={'toolbar-item spaced ' + (isBold ? 'active' : '')}
+        aria-label="Format Bold">
+        <i className="format bold" />
       </button>
       <button
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
         }}
-        style={{
-          ...buttonStyle,
-          backgroundColor: isItalic ? '#e6e6e6' : '#fff',
-        }}
-        aria-label="Format Italics"
-      >
-        I
+        className={'toolbar-item spaced ' + (isItalic ? 'active' : '')}
+        aria-label="Format Italics">
+        <i className="format italic" />
       </button>
       <button
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
         }}
-        style={{
-          ...buttonStyle,
-          backgroundColor: isUnderline ? '#e6e6e6' : '#fff',
-        }}
-        aria-label="Format Underline"
-      >
-        U
+        className={'toolbar-item spaced ' + (isUnderline ? 'active' : '')}
+        aria-label="Format Underline">
+        <i className="format underline" />
       </button>
-      <button
-        onClick={() => {
-          editor.dispatchCommand(UNDO_COMMAND, undefined);
-        }}
-        disabled={!canUndo}
-        style={{
-          ...buttonStyle,
-          opacity: canUndo ? 1 : 0.5,
-        }}
-        aria-label="Undo"
-      >
-        Undo
-      </button>
-      <button
-        onClick={() => {
-          editor.dispatchCommand(REDO_COMMAND, undefined);
-        }}
-        disabled={!canRedo}
-        style={{
-          ...buttonStyle,
-          opacity: canRedo ? 1 : 0.5,
-        }}
-        aria-label="Redo"
-      >
-        Redo
-      </button>
+      <Divider />
       <select
-      onChange={onHeadingChange}
-      value={currentHeading}
-      style={{
-        ...buttonStyle,
-        appearance: 'none',
-        WebkitAppearance: 'none',
-        MozAppearance: 'none',
-        padding: '6px 24px 6px 12px',
-        backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 8px top 50%',
-        backgroundSize: '12px auto',
-      }}
-    >
-      <option value="paragraph">Normal</option>
-      <option value="h1">Heading 1</option>
-      <option value="h2">Heading 2</option>
-      <option value="h3">Heading 3</option>
-      <option value="h4">Heading 4</option>
-      <option value="h5">Heading 5</option>
-      <option value="h6">Heading 6</option>
-    </select>
+        className="toolbar-item block-controls"
+        value={currentHeading}
+        onChange={onHeadingChange}
+      >
+        <option value="paragraph">Normal</option>
+        <option value="h1">Heading 1</option>
+        <option value="h2">Heading 2</option>
+        <option value="h3">Heading 3</option>
+        <option value="h4">Heading 4</option>
+        <option value="h5">Heading 5</option>
+        <option value="h6">Heading 6</option>
+      </select>
     </div>
   );
 }

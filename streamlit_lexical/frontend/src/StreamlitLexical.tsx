@@ -28,7 +28,11 @@ interface State {
   editorState: string;
 }
 
-class StreamlitLexical extends StreamlitComponentBase<State> {
+interface Props {
+  min_height: number;
+}
+
+class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   public state: State = {
     editorState: '',
   };
@@ -43,7 +47,7 @@ class StreamlitLexical extends StreamlitComponentBase<State> {
   };
 
   public render = (): React.ReactNode => {
-    const { theme } = this.props;
+    const { theme, args } = this.props;
     const style: React.CSSProperties = {};
 
     if (theme) {
@@ -57,7 +61,7 @@ class StreamlitLexical extends StreamlitComponentBase<State> {
             <ToolbarPlugin />
             <div className="editor-inner">
               <RichTextPlugin
-                contentEditable={<ContentEditable className="editor-input" />}
+                contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px` }} />}
                 placeholder={<Placeholder />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
