@@ -27,7 +27,9 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useEffect } from 'react';
 import {
   $getRoot,
-  LexicalEditor
+  LexicalEditor,
+  $getSelection,
+  $setSelection
 } from 'lexical';
 
 interface State {
@@ -111,7 +113,22 @@ function EditorContentUpdater({ content, updateContent }: { content: string, upd
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    updateContent(editor, content);
+    editor.update(() => {
+      const root = $getRoot();
+      const currentContent = $convertToMarkdownString(TRANSFORMERS);
+
+      if (content !== currentContent) {
+        const selection = $getSelection();
+
+        root.clear();
+        $convertFromMarkdownString(content, TRANSFORMERS);
+
+        if (selection) {
+          $setSelection(selection);
+        }
+
+      }
+    });
   }, [editor, content, updateContent]);
 
   return null;
