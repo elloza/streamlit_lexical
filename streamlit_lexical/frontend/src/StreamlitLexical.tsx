@@ -26,8 +26,6 @@ import {LinkNode} from '@lexical/link'
 
 import {
   $getRoot,
-  $createParagraphNode,
-  $createTextNode
 } from 'lexical';
 
 interface State {
@@ -45,7 +43,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   public state: State = {
     editorState: '',
   };
-
+  
   private editorConfig = {
     namespace: 'MyStreamlitRichTextEditor',
     theme,
@@ -78,7 +76,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
     return (
       <div style={style} className="streamlit-lexical-editor">
-        <LexicalComposer initialConfig={this.editorConfig}>
+        <LexicalComposer initialConfig={this.editorConfig} key={args.value}>
           <div className="editor-container">
             <ToolbarPlugin />
             <div className="editor-inner">
