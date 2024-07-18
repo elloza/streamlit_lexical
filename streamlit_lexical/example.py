@@ -9,12 +9,13 @@ from __init__ import streamlit_lexical
 
 st.write("#") # if this isnt here, for some reason, if you change the heading prior to entering any text, the page jumps to the bottom
 st.header("Lexical Rich Text Editor")
-# if st.session_state.get('key') is not None:
-#     initial_value = st.session_state.get('key')
-# else:
-#     initial_value = 'initial_value'
+
+# if st.session_state.get('key') is None:
+#     st.session_state['key'] = 'initial value'
+
 # Create an instance of our component with a constant `name` arg, and
 markdown = streamlit_lexical(value="", placeholder="Enter some rich text", key='1234', height=800)
+
 
 # Button to update content
 #st.button("Update Editor Content", on_click=update_val)
