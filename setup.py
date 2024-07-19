@@ -7,13 +7,13 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="streamlit_lexical",
-    version="0.0.1",
+    version="0.0.2",
     author="Ben Fox",
     author_email="ben@musubilabs.ai",
-    description="Streamlit component that allows you to do use Lexical's rich text editor",
+    description="Streamlit component that allows you to use Meta's Lexical rich text editor",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
+    url="https://github.com/musubi-labs/streamlit_lexical",
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[],
@@ -22,7 +22,7 @@ setuptools.setup(
         # By definition, a Custom Component depends on Streamlit.
         # If your component has other Python dependencies, list
         # them here.
-        "streamlit == 1.36.0",
+        "streamlit >= 1.36.0",
     ],
     extras_require={
         "devel": [

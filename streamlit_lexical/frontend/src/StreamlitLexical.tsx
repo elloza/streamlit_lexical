@@ -23,13 +23,9 @@ import { CodeNode } from '@lexical/code';
 import {ListNode, ListItemNode } from '@lexical/list'
 import {ListPlugin} from '@lexical/react/LexicalListPlugin'
 import {LinkNode} from '@lexical/link'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
+
 import {
   $getRoot,
-  LexicalEditor,
-  $getSelection,
-  $setSelection
 } from 'lexical';
 
 interface State {
@@ -55,16 +51,20 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       console.error('Lexical error:', error);
     },
     nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, CodeNode, ListNode, ListItemNode, LinkNode],
-  };
-
-  private updateEditorContent = (editor: LexicalEditor, content: string) => {
-    editor.update(() => {
+    editorState: () => {
       const root = $getRoot();
-      root.clear();
-      $convertFromMarkdownString(content, TRANSFORMERS);
-    });
+      if (root.getFirstChild() === null) {
+        const parsedNodes = $convertFromMarkdownString(this.props.args.value, TRANSFORMERS);
+        return parsedNodes;
+        // } else {
+        //   const paragraph = $createParagraphNode();
+        //   const text = $createTextNode('');
+        //   paragraph.append(text);
+        //   root.append(paragraph);
+        // }
+      }
+    },
   };
-
 
   public render = (): React.ReactNode => {
     const { theme, args } = this.props;
@@ -76,8 +76,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
     return (
       <div style={style} className="streamlit-lexical-editor">
-        <LexicalComposer initialConfig={this.editorConfig}>
-        <EditorContentUpdater content={args.value} updateContent={this.updateEditorContent} />
+        <LexicalComposer initialConfig={this.editorConfig} key={args.value}>
           <div className="editor-container">
             <ToolbarPlugin />
             <div className="editor-inner">
@@ -109,30 +108,6 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   }, this.props.args.debounce); 
 }
 
-function EditorContentUpdater({ content, updateContent }: { content: string, updateContent: (editor: LexicalEditor, content: string) => void }) {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    editor.update(() => {
-      const root = $getRoot();
-      const currentContent = $convertToMarkdownString(TRANSFORMERS);
-
-      if (content !== currentContent) {
-        const selection = $getSelection();
-
-        root.clear();
-        $convertFromMarkdownString(content, TRANSFORMERS);
-
-        if (selection) {
-          $setSelection(selection);
-        }
-
-      }
-    });
-  }, [editor, content, updateContent]);
-
-  return null;
-}
 
 function Placeholder({ text }: { text: string }) {
   return <div className="editor-placeholder">{text}</div>;
