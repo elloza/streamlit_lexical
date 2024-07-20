@@ -23,9 +23,14 @@ import { CodeNode } from '@lexical/code';
 import {ListNode, ListItemNode } from '@lexical/list'
 import {ListPlugin} from '@lexical/react/LexicalListPlugin'
 import {LinkNode} from '@lexical/link'
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useEffect } from 'react';
 import {
   $getRoot,
+  LexicalEditor,
+  $getSelection,
+  $setSelection,
+  CLEAR_HISTORY_COMMAND
 } from 'lexical';
 
 interface State {
@@ -37,6 +42,7 @@ interface Props {
   value: string;
   placeholder: string;
   debounce: number;
+  key: string;
 }
 
 class StreamlitLexical extends StreamlitComponentBase<State, Props> {
@@ -45,26 +51,22 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   };
   
   private editorConfig = {
-    namespace: 'MyStreamlitRichTextEditor',
+    namespace: `MyStreamlitRichTextEditor-${this.props.args.key}`,
     theme,
     onError: (error: Error) => {
       console.error('Lexical error:', error);
     },
     nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, CodeNode, ListNode, ListItemNode, LinkNode],
-    editorState: () => {
-      const root = $getRoot();
-      if (root.getFirstChild() === null) {
-        const parsedNodes = $convertFromMarkdownString(this.props.args.value, TRANSFORMERS);
-        return parsedNodes;
-        // } else {
-        //   const paragraph = $createParagraphNode();
-        //   const text = $createTextNode('');
-        //   paragraph.append(text);
-        //   root.append(paragraph);
-        // }
-      }
-    },
   };
+
+  private updateEditorContent = (editor: LexicalEditor, content: string) => {
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      $convertFromMarkdownString(content, TRANSFORMERS);
+    });
+  };
+
 
   public render = (): React.ReactNode => {
     const { theme, args } = this.props;
@@ -76,7 +78,8 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
     return (
       <div style={style} className="streamlit-lexical-editor">
-        <LexicalComposer initialConfig={this.editorConfig} key={args.value}>
+        <LexicalComposer initialConfig={this.editorConfig}>
+        <EditorContentUpdater content={args.value} updateContent={this.updateEditorContent} />
           <div className="editor-container">
             <ToolbarPlugin />
             <div className="editor-inner">
@@ -108,6 +111,32 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   }, this.props.args.debounce); 
 }
 
+function EditorContentUpdater({ content, updateContent }: { content: string, updateContent: (editor: LexicalEditor, content: string) => void }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    editor.update(() => {
+      const root = $getRoot();
+      const currentContent = $convertToMarkdownString(TRANSFORMERS);
+
+      if (content !== currentContent) {
+        const selection = $getSelection();
+
+        root.clear();
+        $convertFromMarkdownString(content, TRANSFORMERS);
+
+        if (selection) {
+          $setSelection(selection);
+        }
+
+        // Clear the undo/redo history
+        editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
+      }
+    });
+  }, [editor, content, updateContent]);
+
+  return null;
+}
 
 function Placeholder({ text }: { text: string }) {
   return <div className="editor-placeholder">{text}</div>;
