@@ -24,13 +24,15 @@ import {ListNode, ListItemNode } from '@lexical/list'
 import {ListPlugin} from '@lexical/react/LexicalListPlugin'
 import {LinkNode} from '@lexical/link'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   $getRoot,
-  LexicalEditor,
   $getSelection,
   $setSelection,
-  CLEAR_HISTORY_COMMAND
+  CLEAR_HISTORY_COMMAND,
+  FOCUS_COMMAND,
+  BLUR_COMMAND,
+  COMMAND_PRIORITY_LOW,
 } from 'lexical';
 
 interface State {
@@ -59,15 +61,6 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, CodeNode, ListNode, ListItemNode, LinkNode],
   };
 
-  private updateEditorContent = (editor: LexicalEditor, content: string) => {
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
-      $convertFromMarkdownString(content, TRANSFORMERS);
-    });
-  };
-
-
   public render = (): React.ReactNode => {
     const { theme, args } = this.props;
     const style: React.CSSProperties = {};
@@ -79,12 +72,12 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     return (
       <div style={style} className="streamlit-lexical-editor">
         <LexicalComposer initialConfig={this.editorConfig}>
-        <EditorContentUpdater content={args.value} updateContent={this.updateEditorContent} />
+        <EditorContentUpdater content={args.value} />
           <div className="editor-container">
             <ToolbarPlugin />
             <div className="editor-inner">
               <RichTextPlugin
-                contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px` }} />}
+                contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px`, maxHeight: `${args.min_height}px`, overflowY: 'auto' }} />}
                 placeholder={<Placeholder text={args.placeholder} />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
@@ -101,39 +94,71 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     );
   };
 
-  private handleEditorChange = debounce((editorState: any) => {
+  private handleEditorChange = (editorState: any) => {
     editorState.read(() => {
       const markdown = $convertToMarkdownString(TRANSFORMERS);
-      const jsonState = JSON.stringify(editorState.toJSON());
-      this.setState({ editorState: jsonState });
-      Streamlit.setComponentValue(markdown);
+      // const jsonState = JSON.stringify(editorState.toJSON());
+      // this.setState({ editorState: jsonState });
+      this.debouncedSetComponentValue(markdown);
     });
-  }, this.props.args.debounce); 
+  }
+  
+  private debouncedSetComponentValue = debounce((value: string) => {
+    Streamlit.setComponentValue(value);
+  }, this.props.args.debounce)
 }
 
-function EditorContentUpdater({ content, updateContent }: { content: string, updateContent: (editor: LexicalEditor, content: string) => void }) {
+function EditorContentUpdater({ content }: { content: string }) {
   const [editor] = useLexicalComposerContext();
+  const [isFocused, setIsFocused] = useState(false);
+  const [lastContent, setLastContent] = useState(content);
 
   useEffect(() => {
-    editor.update(() => {
-      const root = $getRoot();
-      const currentContent = $convertToMarkdownString(TRANSFORMERS);
+    const unregisterFocus = editor.registerCommand(
+      FOCUS_COMMAND,
+      () => {
+        setIsFocused(true);
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
 
-      if (content !== currentContent) {
-        const selection = $getSelection();
+    const unregisterBlur = editor.registerCommand(
+      BLUR_COMMAND,
+      () => {
+        setIsFocused(false);
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
 
-        root.clear();
-        $convertFromMarkdownString(content, TRANSFORMERS);
+    return () => {
+      unregisterFocus();
+      unregisterBlur();
+    };
+  }, [editor]);
 
-        if (selection) {
-          $setSelection(selection);
+  useEffect(() => {
+    if (!isFocused) {
+      editor.update(() => {
+        const currentContent = $convertToMarkdownString(TRANSFORMERS);
+        if (content !== currentContent) {
+          const root = $getRoot();
+          const selection = $getSelection();
+          
+          root.clear();
+          $convertFromMarkdownString(content, TRANSFORMERS);
+
+          if (selection) {
+            $setSelection(selection);
+          }
+
+          editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
         }
-
-        // Clear the undo/redo history
-        editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
-      }
-    });
-  }, [editor, content, updateContent]);
+      });
+      setLastContent(content);
+    }
+  }, [editor, content, isFocused, lastContent]);
 
   return null;
 }

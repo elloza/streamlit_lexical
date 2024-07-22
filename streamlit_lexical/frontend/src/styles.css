@@ -22,11 +22,16 @@
   border-radius: 0.25rem;
   background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-inner {
   background: white;
   position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-input {
@@ -43,7 +48,15 @@
   background-color: white;
   /* border: 1px solid var(--secondary-background-color); */
   border-radius: 0 0 0.25rem 0.25rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  line-height: 1.2;
   /* margin-top: -1px; */
+}
+
+.editor-paragraph {
+  margin: 0;
+  padding: 0;
 }
 
 /* .editor-heading-h1 {
@@ -54,6 +67,12 @@
   margin-bottom: 12px;
   padding: 0;
 } */
+.editor-heading-h1,
+.editor-heading-h2,
+.editor-heading-h3 {
+  padding: 0.25rem 0;
+  margin: 0.25rem 0;
+}
 
 .editor-heading-h1 {
   font-size: 20px;
@@ -65,6 +84,27 @@
 
 .editor-heading-h3 {
   font-size: 16px;
+}
+
+.editor-input ul,
+.editor-input ol {
+  padding-left: 20px;
+  margin: 0.5rem 0;
+}
+
+.editor-input li {
+  margin-bottom: 0.25rem;
+}
+
+.editor-input li:last-child {
+  margin-bottom: 0;
+}
+
+.editor-input p + ul,
+.editor-input p + ol,
+.editor-input ul + p,
+.editor-input ol + p {
+  margin-top: 0.5rem;
 }
 
 /* .editor-heading-h4 {
