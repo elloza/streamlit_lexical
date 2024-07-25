@@ -31,6 +31,7 @@ import {
   $setSelection,
   CLEAR_HISTORY_COMMAND,
   FOCUS_COMMAND,
+  PASTE_COMMAND,
   BLUR_COMMAND,
   COMMAND_PRIORITY_LOW,
 } from 'lexical';
@@ -132,9 +133,25 @@ function EditorContentUpdater({ content }: { content: string }) {
       COMMAND_PRIORITY_LOW
     );
 
+    const unregisterPaste = editor.registerCommand(
+      PASTE_COMMAND,
+      (event: ClipboardEvent) => {
+        event.preventDefault();
+        const text = event.clipboardData?.getData('text/plain');
+        if (text) {
+          editor.update(() => {
+            $convertFromMarkdownString(text, TRANSFORMERS);
+          });
+        }
+        return true;
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
     return () => {
       unregisterFocus();
       unregisterBlur();
+      unregisterPaste();
     };
   }, [editor]);
 
