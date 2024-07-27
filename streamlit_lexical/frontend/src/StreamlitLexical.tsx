@@ -33,6 +33,8 @@ import {
   FOCUS_COMMAND,
   PASTE_COMMAND,
   BLUR_COMMAND,
+  $isRangeSelection,
+  
   COMMAND_PRIORITY_LOW,
 } from 'lexical';
 
@@ -134,19 +136,25 @@ function EditorContentUpdater({ content }: { content: string }) {
     );
 
     const unregisterPaste = editor.registerCommand(
-      PASTE_COMMAND,
-      (event: ClipboardEvent) => {
-        event.preventDefault();
-        const text = event.clipboardData?.getData('text/plain');
-        if (text) {
-          editor.update(() => {
-            $convertFromMarkdownString(text, TRANSFORMERS);
-          });
-        }
-        return true;
-      },
-      COMMAND_PRIORITY_LOW
-    );
+        PASTE_COMMAND,
+        (event: ClipboardEvent) => {
+          event.preventDefault();
+          const text = event.clipboardData?.getData('text/plain');
+          if (text) {
+            editor.update(() => {
+              const selection = $getSelection();
+              if ($isRangeSelection(selection)) {
+                selection.insertText(text);
+                const markdown = $convertToMarkdownString(TRANSFORMERS);
+                $convertFromMarkdownString(markdown, TRANSFORMERS);
+                
+              }
+            });
+          }
+          return true;
+        },
+        COMMAND_PRIORITY_LOW
+      );
 
     return () => {
       unregisterFocus();
