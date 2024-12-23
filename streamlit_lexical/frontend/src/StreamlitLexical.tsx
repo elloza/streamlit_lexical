@@ -114,22 +114,33 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 function EditorContentUpdater({ content, overwrite }: { content: string; overwrite: boolean }) {
   const [editor] = useLexicalComposerContext();
 
-
   useEffect(() => {
     editor.update(() => {
       const root = $getRoot();
-      root.clear();
-      $convertFromMarkdownString(content, TRANSFORMERS);
-
-      // Optionally, clear history to prevent undo issues
-      editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
-
-      // Notify Streamlit of the content update
-      const newMarkdown = $convertToMarkdownString(TRANSFORMERS);
-      Streamlit.setComponentValue(newMarkdown);
+      // Only set content if root is empty or overwrite is true
+      if (root.getTextContent() === '' || overwrite) {
+        root.clear();
+        $convertFromMarkdownString(content, TRANSFORMERS);
+        // Clear history to prevent undo to empty state
+        editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
+      }
     });
-  // Include 'updateCounter' in dependencies to trigger when it changes
   }, [editor, content, overwrite]);
+  // useEffect(() => {
+  //   editor.update(() => {
+  //     const root = $getRoot();
+  //     root.clear();
+  //     $convertFromMarkdownString(content, TRANSFORMERS);
+
+  //     // Optionally, clear history to prevent undo issues
+  //     editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
+
+  //     // Notify Streamlit of the content update
+  //     const newMarkdown = $convertToMarkdownString(TRANSFORMERS);
+  //     Streamlit.setComponentValue(newMarkdown);
+  //   });
+  // // Include 'updateCounter' in dependencies to trigger when it changes
+  // }, [editor, content, overwrite]);
 
   useEffect(() => {
     const unregisterPaste = editor.registerCommand(
