@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@lexical/html": "^0.17.0",
     "@lexical/react": "^0.17.0",
     "lexical": "^0.17.0",
     "react": "^18.3.1",

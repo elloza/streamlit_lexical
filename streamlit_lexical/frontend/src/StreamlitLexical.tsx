@@ -34,6 +34,8 @@ import {
   PASTE_COMMAND,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
+  $createParagraphNode,
+  $copyNode,
 } from 'lexical';
 
 interface State {
@@ -60,6 +62,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     onError: (error: Error) => {
       console.error('Lexical error:', error);
     },
+    editorState: () => $convertFromMarkdownString(this.props.args.value, TRANSFORMERS, undefined, true),
     nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, CodeNode, ListNode, ListItemNode, LinkNode],
   };
 
@@ -75,23 +78,23 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       <div style={style} className="streamlit-lexical-editor">
         <LexicalComposer initialConfig={this.editorConfig}>
         <EditorContentUpdater content={args.value} overwrite={args.overwrite}/>
-          <div className="editor-container">
-            <ToolbarPlugin />
-            <div className="editor-inner">
-              <RichTextPlugin
-                contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px`, maxHeight: `${args.min_height}px`, overflowY: 'auto' }} />}
-                placeholder={<Placeholder text={args.placeholder} />}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <AutoFocusPlugin />
-              <MarkdownShortcutPlugin />
-              <ListPlugin />
-              {/* <TreeViewPlugin /> */}
-              <OnChangePlugin onChange={this.handleEditorChange} />
-              {/* <EditorUpdateListener /> */}
-            </div>
+        <div className="editor-container">
+          <ToolbarPlugin />
+          <div className="editor-inner">
+            <RichTextPlugin
+              contentEditable={<ContentEditable className="editor-input" style={{ minHeight: `${args.min_height}px`, maxHeight: `${args.min_height}px`, overflowY: 'auto' }} />}
+              placeholder={<Placeholder text={args.placeholder} />}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <AutoFocusPlugin />
+            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+            <ListPlugin />
+            {/* <TreeViewPlugin /> */}
+            <OnChangePlugin onChange={this.handleEditorChange} />
+            {/* <EditorUpdateListener /> */}
           </div>
+        </div>
         </LexicalComposer>
       </div>
     );
@@ -99,7 +102,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
   private handleEditorChange = (editorState: any) => {
     editorState.read(() => {
-      const markdown = $convertToMarkdownString(TRANSFORMERS);
+      const markdown = $convertToMarkdownString(TRANSFORMERS, undefined, true);
       // const jsonState = JSON.stringify(editorState.toJSON());
       // this.setState({ editorState: jsonState });
       this.debouncedSetComponentValue(markdown);
@@ -120,167 +123,16 @@ function EditorContentUpdater({ content, overwrite }: { content: string; overwri
       // Only set content if root is empty or overwrite is true
       if (root.getTextContent() === '' || overwrite) {
         root.clear();
-        $convertFromMarkdownString(content, TRANSFORMERS);
+        $convertFromMarkdownString(content, TRANSFORMERS, undefined, true);
         // Clear history to prevent undo to empty state
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
       }
     });
   }, [editor, content, overwrite]);
-  // useEffect(() => {
-  //   editor.update(() => {
-  //     const root = $getRoot();
-  //     root.clear();
-  //     $convertFromMarkdownString(content, TRANSFORMERS);
-
-  //     // Optionally, clear history to prevent undo issues
-  //     editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
-
-  //     // Notify Streamlit of the content update
-  //     const newMarkdown = $convertToMarkdownString(TRANSFORMERS);
-  //     Streamlit.setComponentValue(newMarkdown);
-  //   });
-  // // Include 'updateCounter' in dependencies to trigger when it changes
-  // }, [editor, content, overwrite]);
-
-  useEffect(() => {
-    const unregisterPaste = editor.registerCommand(
-      PASTE_COMMAND,
-      (event: ClipboardEvent) => {
-        event.preventDefault();
-        const text = event.clipboardData?.getData('text/plain');
-        if (text) {
-          editor.update(() => {
-            const selection = $getSelection();
-            if ($isRangeSelection(selection)) {
-              selection.insertText(text);
-              const markdown = $convertToMarkdownString(TRANSFORMERS);
-              $convertFromMarkdownString(markdown, TRANSFORMERS);
-            }
-          });
-        }
-        return true;
-      },
-      COMMAND_PRIORITY_LOW
-    );
-
-    // Cleanup function to unregister the paste handler when the component unmounts
-    return () => {
-      unregisterPaste();
-    };
-  }, [editor]);
 
   return null;
 }
 
-
-// function EditorContentUpdater({ content }: { content: string }) {
-//   const [editor] = useLexicalComposerContext();
-//   const contentRef = useRef(content);
-
-//   // This effect runs on mount and updates the editor with the initial content
-//   useLayoutEffect(() => {
-//     editor.update(() => {
-//       const root = $getRoot();
-//       if (root.getTextContent() === '') {
-//         $convertFromMarkdownString(content, TRANSFORMERS);
-//       }
-//     });
-//   }, [editor]);
-
-//   // This effect runs on every content change
-//   useEffect(() => {
-//     if (content !== contentRef.current) {
-//       editor.update(() => {
-//         const root = $getRoot();
-//         const currentContent = $convertToMarkdownString(TRANSFORMERS);
-//         if (content !== currentContent) {
-//           root.clear();
-//           $convertFromMarkdownString(content, TRANSFORMERS);
-//         }
-//       });
-//       contentRef.current = content;
-//     }
-//   }, [editor, content]);
-
-//   return null;
-// }
-
-// function EditorContentUpdater({ content }: { content: string }) {
-//   const [editor] = useLexicalComposerContext();
-//   const [isFocused, setIsFocused] = useState(false);
-//   const [lastContent, setLastContent] = useState(content);
-
-//   useEffect(() => {
-//     const unregisterFocus = editor.registerCommand(
-//       FOCUS_COMMAND,
-//       () => {
-//         setIsFocused(true);
-//         return false;
-//       },
-//       COMMAND_PRIORITY_LOW
-//     );
-
-//     const unregisterBlur = editor.registerCommand(
-//       BLUR_COMMAND,
-//       () => {
-//         setIsFocused(false);
-//         return false;
-//       },
-//       COMMAND_PRIORITY_LOW
-//     );
-
-//     const unregisterPaste = editor.registerCommand(
-//         PASTE_COMMAND,
-//         (event: ClipboardEvent) => {
-//           event.preventDefault();
-//           const text = event.clipboardData?.getData('text/plain');
-//           if (text) {
-//             editor.update(() => {
-//               const selection = $getSelection();
-//               if ($isRangeSelection(selection)) {
-//                 selection.insertText(text);
-//                 const markdown = $convertToMarkdownString(TRANSFORMERS);
-//                 $convertFromMarkdownString(markdown, TRANSFORMERS);
-                
-//               }
-//             });
-//           }
-//           return true;
-//         },
-//         COMMAND_PRIORITY_LOW
-//       );
-
-//     return () => {
-//       unregisterFocus();
-//       unregisterBlur();
-//       unregisterPaste();
-//     };
-//   }, [editor]);
-
-//   useEffect(() => {
-//     if (!isFocused) {
-//       editor.update(() => {
-//         const currentContent = $convertToMarkdownString(TRANSFORMERS);
-//         if (content !== currentContent) {
-//           const root = $getRoot();
-//           const selection = $getSelection();
-          
-//           root.clear();
-//           $convertFromMarkdownString(content, TRANSFORMERS);
-
-//           if (selection) {
-//             $setSelection(selection);
-//           }
-
-//           editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
-//         }
-//       });
-//       setLastContent(content);
-//     }
-//   }, [editor, content, isFocused, lastContent]);
-
-//   return null;
-// }
 
 function Placeholder({ text }: { text: string }) {
   return <div className="editor-placeholder">{text}</div>;
