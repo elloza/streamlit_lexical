@@ -1,6 +1,6 @@
 import os
 import streamlit.components.v1 as components
-import random
+
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
@@ -26,7 +26,7 @@ if not _RELEASE:
         # Pass `url` here to tell Streamlit that the component will be served
         # by the local dev server that you run via `npm run start`.
         # (This is useful while your component is in development.)
-        url="http://localhost:3001",
+        url="http://localhost:5173",
     )
 else:
     # When we're distributing a production version of the component, we'll
@@ -43,7 +43,16 @@ else:
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
 
-def streamlit_lexical(height=960, value="", placeholder="", debounce=500, key=None, overwrite=True, on_change=None):
+
+def streamlit_lexical(
+    height=960,
+    value="",
+    placeholder="",
+    debounce=500,
+    key=None,
+    overwrite=True,
+    on_change=None,
+):
     """Create a new instance of "streamlit_lexical".
 
     Parameters
@@ -72,7 +81,15 @@ def streamlit_lexical(height=960, value="", placeholder="", debounce=500, key=No
 
     """
     assert debounce > 0, "Debounce must be greater than 0."
-    assert height > 0, "The min_height must be greater than 0." 
+    assert height > 0, "The min_height must be greater than 0."
 
-    component_value = _component_func(min_height=height, value=value, placeholder=placeholder, debounce=debounce, key=key, overwrite=overwrite, on_change=on_change)
+    component_value = _component_func(
+        min_height=height,
+        value=value,
+        placeholder=placeholder,
+        debounce=debounce,
+        key=key,
+        overwrite=overwrite,
+        on_change=on_change,
+    )
     return component_value

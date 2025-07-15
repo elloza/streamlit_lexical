@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="streamlit_lexical",
-    version="1.1",
+    version="1.2.0",
     author="Ben F",
     author_email="ben@musubilabs.ai",
     description="Streamlit component that allows you to use Meta's Lexical rich text editor",
@@ -33,5 +33,5 @@ setuptools.setup(
             "pytest-playwright-snapshot==1.0",
             "pytest-rerunfailures==12.0",
         ]
-    }
+    },
 )
