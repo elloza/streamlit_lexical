@@ -1,10 +1,11 @@
 import React from "react"
-import ReactDOM from "react-dom/client"
+import ReactDOM from "react-dom"
 import StreamlitLexical from "./StreamlitLexical"
-import "./styles.css"
+import './styles.css'
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.render(
   <React.StrictMode>
     <StreamlitLexical />
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById("root")
 )

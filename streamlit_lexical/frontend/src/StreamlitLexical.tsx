@@ -160,7 +160,7 @@ function EditorContentUpdater({
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined)
       }
     })
-  }, [editor, content, overwrite])
+  }, [editor, content, overwrite, currentMarkdown])
 
   return null
 }
