@@ -43,6 +43,7 @@ export default function ToolbarPlugin() {
   const [currentHeading, setCurrentHeading] = useState('paragraph');
   const [blockType, setBlockType] = useState('paragraph');
   const [showImageDialog, setShowImageDialog] = useState(false);
+  const [codeLanguage, setCodeLanguage] = useState('javascript');
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -70,6 +71,9 @@ export default function ToolbarPlugin() {
         // Check if it's a code node first using Lexical's type check
         if ($isCodeNode(element)) {
           setBlockType('code');
+          // Update code language state
+          const language = element.getLanguage() || 'javascript';
+          setCodeLanguage(language);
         } else {
           const elementKey = element.getKey();
           const elementDOM = editor.getElementByKey(elementKey);
@@ -164,29 +168,18 @@ export default function ToolbarPlugin() {
     setShowImageDialog(false);
   };
 
-  const getCodeLanguage = () => {
-    let codeLanguage = 'javascript';
-    editor.getEditorState().read(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        const anchorNode = selection.anchor.getNode();
-        const element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElement();
-        if ($isCodeNode(element)) {
-          codeLanguage = element.getLanguage() || 'javascript';
-        }
-      }
-    });
-    return codeLanguage;
-  };
-
   const onCodeLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = e.target.value;
+    // Update state immediately for the dropdown
+    setCodeLanguage(newLanguage);
+    
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         const anchorNode = selection.anchor.getNode();
         const element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElement();
         if ($isCodeNode(element)) {
-          element.setLanguage(e.target.value);
+          element.setLanguage(newLanguage);
         }
       }
     });
@@ -339,7 +332,7 @@ export default function ToolbarPlugin() {
         <Select
           className="toolbar-item code-language"
           onChange={onCodeLanguageChange}
-          value={getCodeLanguage()}
+          value={codeLanguage}
           label="Language"
         >
           <option value="">Select Language</option>
