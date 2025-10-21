@@ -46,6 +46,7 @@ else:
 
 def streamlit_lexical(
     height=960,
+    min_height=None,
     value="",
     placeholder="",
     debounce=500,
@@ -81,10 +82,14 @@ def streamlit_lexical(
 
     """
     assert debounce > 0, "Debounce must be greater than 0."
-    assert height > 0, "The min_height must be greater than 0."
+
+    # Support both `height` (legacy) and `min_height` (explicit) kwargs.
+    # If `min_height` is provided, prefer it; otherwise use `height`.
+    min_h = min_height if min_height is not None else height
+    assert min_h > 0, "The min_height must be greater than 0."
 
     component_value = _component_func(
-        min_height=height,
+        min_height=min_h,
         value=value,
         placeholder=placeholder,
         debounce=debounce,

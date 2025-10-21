@@ -12,6 +12,7 @@ import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin"
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import ToolbarPlugin from "./plugins/ToolbarPlugin"
+import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin"
 
 import theme from "./theme"
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin"
@@ -19,18 +20,46 @@ import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
   TRANSFORMERS,
+  TextMatchTransformer,
 } from "@lexical/markdown"
 
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
-import { CodeNode } from "@lexical/code"
+import { CodeNode, CodeHighlightNode } from "@lexical/code"
 import { ListNode, ListItemNode } from "@lexical/list"
 import { ListPlugin } from "@lexical/react/LexicalListPlugin"
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin"
-import { LinkNode } from "@lexical/link"
+import { LinkNode, AutoLinkNode } from "@lexical/link"
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin"
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { useEffect } from "react"
 import { $getRoot, CLEAR_HISTORY_COMMAND } from "lexical"
+import { ImageNode, $createImageNode, $isImageNode } from "./nodes/ImageNode"
+import ImagesPlugin from "./plugins/ImagesPlugin"
+
+// Custom transformers array that includes image support
+const CUSTOM_TRANSFORMERS = [
+  ...TRANSFORMERS,
+  {
+    dependencies: [ImageNode],
+    export: (node: any) => {
+      if (!$isImageNode(node)) {
+        return null;
+      }
+      return `![${node.getAltText()}](${node.getSrc()})`;
+    },
+    importRegExp: /!\[([^\]]*)\]\(([^)]+)\)/,
+    regExp: /!\[([^\]]*)\]\(([^)]+)\)$/,
+    replace: (textNode: any, match: any) => {
+      const [, altText, src] = match;
+      const imageNode = $createImageNode({ altText, src });
+      textNode.replace(imageNode);
+    },
+    trigger: ')',
+    type: 'text-match' as const,
+  },
+];
 
 interface State {
   editorState: string
@@ -61,7 +90,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     editorState: () =>
       $convertFromMarkdownString(
         this.props.args.value,
-        TRANSFORMERS,
+        CUSTOM_TRANSFORMERS,
         undefined,
         true
       ),
@@ -70,9 +99,12 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       HeadingNode,
       QuoteNode,
       CodeNode,
+      CodeHighlightNode,
       ListNode,
       ListItemNode,
       LinkNode,
+      AutoLinkNode,
+      ImageNode,
     ],
   }
 
@@ -111,8 +143,12 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
               />
               <HistoryPlugin />
               <AutoFocusPlugin />
-              <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+              <CodeHighlightPlugin />
+              <MarkdownShortcutPlugin transformers={CUSTOM_TRANSFORMERS} />
               <ListPlugin />
+              <CheckListPlugin />
+              <LinkPlugin />
+              <ImagesPlugin />
               <TabIndentationPlugin />
               {/* <TreeViewPlugin /> */}
               <OnChangePlugin onChange={this.handleEditorChange} />
@@ -126,7 +162,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
   private handleEditorChange = (editorState: any) => {
     editorState.read(() => {
-      const markdown = $convertToMarkdownString(TRANSFORMERS, undefined, true)
+      const markdown = $convertToMarkdownString(CUSTOM_TRANSFORMERS, undefined, true)
       this.debouncedSetComponentValue(markdown)
     })
   }
@@ -157,7 +193,7 @@ function EditorContentUpdater({
       // Only set content if root is empty or overwrite is true
       if (root.getTextContent() === "" || overwrite) {
         root.clear()
-        $convertFromMarkdownString(content, TRANSFORMERS, undefined, true)
+        $convertFromMarkdownString(content, CUSTOM_TRANSFORMERS, undefined, true)
         // Clear history to prevent undo to empty state
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined)
       }

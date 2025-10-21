@@ -67,3 +67,4 @@ streamlit_lexical/**/package-lock.json
 ########################################################################
 .vscode/
 buildcontext/
+.conda/

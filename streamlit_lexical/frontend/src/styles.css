@@ -317,3 +317,395 @@ i.underline {
   font-style: italic;
   text-decoration: underline;
 }
+
+/* Additional text formatting styles */
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-code {
+  background-color: rgba(135, 131, 120, 0.15);
+  color: #eb5757;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+/* Quote block styles */
+.editor-quote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #ccc;
+  color: #666;
+  font-style: italic;
+}
+
+/* Code block styles */
+.editor-code {
+  background-color: #f5f5f5;
+  font-family: 'Courier New', Courier, monospace;
+  display: block;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+  font-size: 0.9em;
+  overflow-x: auto;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  tab-size: 2;
+  white-space: pre;
+}
+
+/* Link styles */
+.editor-link {
+  color: #0078d4;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.editor-link:hover {
+  text-decoration: underline;
+}
+
+.editor-link:visited {
+  color: #005a9e;
+}
+
+/* Text alignment */
+.editor-text-left {
+  text-align: left;
+}
+
+.editor-text-center {
+  text-align: center;
+}
+
+.editor-text-right {
+  text-align: right;
+}
+
+.editor-text-justify {
+  text-align: justify;
+}
+
+/* Toolbar icon styles for new buttons */
+i.strikethrough {
+  background-image: url(icons/type-strikethrough.svg);
+}
+
+i.code {
+  background-image: url(icons/code.svg);
+}
+
+i.link {
+  background-image: url(icons/link.svg);
+}
+
+i.bullet-list {
+  background-image: url(icons/list-ul.svg);
+}
+
+i.numbered-list {
+  background-image: url(icons/list-ol.svg);
+}
+
+i.quote {
+  background-image: url(icons/chat-quote.svg);
+}
+
+i.code-block {
+  background-image: url(icons/code-square.svg);
+}
+
+i.left-align {
+  background-image: url(icons/text-left.svg);
+}
+
+i.center-align {
+  background-image: url(icons/text-center.svg);
+}
+
+i.right-align {
+  background-image: url(icons/text-right.svg);
+}
+
+i.justify-align {
+  background-image: url(icons/justify.svg);
+}
+
+i.image {
+  background-image: url(icons/image.svg);
+}
+
+/* Image styles */
+.editor-image {
+  cursor: default;
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+.editor-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
+/* Dialog styles for image insertion */
+.DialogButtonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.DialogActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.Input__wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.Input__label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.Input__input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.Input__input:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+/* Code language selector styles */
+.toolbar .code-language {
+  margin-left: 8px;
+  font-size: 13px;
+  min-width: 120px;
+}
+
+.toolbar .code-language .Input__wrapper {
+  margin-bottom: 0;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar .code-language .Input__label {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: normal;
+  color: #666;
+  white-space: nowrap;
+}
+
+.toolbar .code-language select {
+  padding: 4px 24px 4px 8px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  color: #555;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.toolbar .code-language select:hover {
+  background-color: #f8f8f8;
+  border-color: #ccc;
+}
+
+.toolbar .code-language select:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+/* File upload dialog styles */
+.FileInput__wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.FileInput__label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.FileInput__input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.FileInput__input:hover {
+  border-color: #999;
+}
+
+.FileInput__input:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+/* Button styles for dialogs */
+.Button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 4px;
+}
+
+.Button__primary {
+  background-color: #0078d4;
+  color: white;
+}
+
+.Button__primary:hover:not(:disabled) {
+  background-color: #005a9e;
+}
+
+.Button__secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.Button__secondary:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.Button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dialog backdrop and container */
+.Dialog__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.Dialog__container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.Dialog__title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.Dialog__content {
+  margin-bottom: 20px;
+}
+
+/* Code syntax highlighting tokens */
+.editor-code {
+  background-color: #f5f5f5;
+  font-family: 'Menlo', 'Consolas', 'Monaco', 'Courier New', monospace;
+  display: block;
+  padding: 8px 8px 8px 52px;
+  line-height: 1.53;
+  font-size: 13px;
+  margin: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  position: relative;
+  tab-size: 2;
+}
+
+.editor-code:before {
+  content: attr(data-gutter);
+  position: absolute;
+  background-color: #eee;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #ccc;
+  padding: 8px;
+  color: #777;
+  white-space: pre-wrap;
+  text-align: right;
+  min-width: 25px;
+}
+
+.editor-code:after {
+  content: attr(data-highlight-language);
+  top: 0;
+  right: 3px;
+  padding: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  position: absolute;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.editor-tokenComment {
+  color: slategray;
+}
+
+.editor-tokenPunctuation {
+  color: #999;
+}
+
+.editor-tokenProperty {
+  color: #905;
+}
+
+.editor-tokenSelector {
+  color: #690;
+}
+
+.editor-tokenOperator {
+  color: #9a6e3a;
+}
+
+.editor-tokenAttr {
+  color: #07a;
+}
+
+.editor-tokenVariable {
+  color: #e90;
+}
+
+.editor-tokenFunction {
+  color: #dd4a68;
+}
